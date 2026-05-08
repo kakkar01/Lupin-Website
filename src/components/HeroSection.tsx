@@ -195,7 +195,7 @@ export default function HeroSection() {
               fontWeight: 300,
             }}
           >
-            2045 AGENT COMING SOON
+            2045 // INSTINCT ACTIVE
           </motion.p>
 
           {/* Thin divider */}
