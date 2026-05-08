@@ -111,44 +111,148 @@ function MicroInfo({ delay = 0 }: { delay?: number }) {
   );
 }
 
-// ── Noise flicker on LUPIN ───────────────────────────────────────────────────
+// ── Glitch LUPIN title ───────────────────────────────────────────────────────
 function LupinTitle() {
-  const controls = useAnimationControls();
+  const controls       = useAnimationControls();
+  const glitch1Ctrl    = useAnimationControls();
+  const glitch2Ctrl    = useAnimationControls();
+  const glitch3Ctrl    = useAnimationControls();
 
   useEffect(() => {
     let mounted = true;
+
     const run = async () => {
       await controls.start("visible");
+
       while (mounted) {
-        await new Promise((r) => setTimeout(r, 3500 + Math.random() * 5000));
+        // Random quiet window between glitch bursts
+        await new Promise((r) => setTimeout(r, 2800 + Math.random() * 4200));
         if (!mounted) break;
-        await controls.start({
-          opacity: [1, 0.35, 1, 0.55, 1],
-          transition: { duration: 0.16, ease: "linear" as const },
-        });
+
+        const burstCount = 1 + Math.floor(Math.random() * 3);
+        for (let g = 0; g < burstCount; g++) {
+          const dur = 0.08 + Math.random() * 0.10;
+          await Promise.all([
+            controls.start({
+              opacity: [1, 0.55, 1, 0.75, 1],
+              transition: { duration: dur + 0.04, ease: "linear" as const },
+            }),
+            glitch1Ctrl.start({
+              x:       [-5, 7, -3, 0],
+              opacity: [0, 0.45, 0.22, 0],
+              transition: { duration: dur, ease: "linear" as const },
+            }),
+            glitch2Ctrl.start({
+              x:       [4, -8, 3, 0],
+              opacity: [0, 0.35, 0.18, 0],
+              transition: { duration: dur * 0.85, ease: "linear" as const },
+            }),
+            glitch3Ctrl.start({
+              x:       [-2, 4, -1, 0],
+              y:       [1, -2, 1, 0],
+              opacity: [0, 0.20, 0.10, 0],
+              transition: { duration: dur * 1.1, ease: "linear" as const },
+            }),
+          ]);
+          if (g < burstCount - 1) {
+            await new Promise((r) => setTimeout(r, 40 + Math.random() * 120));
+          }
+        }
       }
     };
+
     run();
     return () => { mounted = false; };
-  }, [controls]);
+  }, [controls, glitch1Ctrl, glitch2Ctrl, glitch3Ctrl]);
+
+  const baseStyle: React.CSSProperties = {
+    fontSize:      "clamp(5rem, 13.5vw, 13.5rem)",
+    letterSpacing: "0.06em",
+    fontStretch:   "condensed",
+    textTransform: "uppercase",
+    fontFamily:    "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif",
+    fontWeight:    300,
+    lineHeight:    1,
+    whiteSpace:    "nowrap",
+    display:       "block",
+  };
 
   return (
-    <motion.h1
-      variants={fadeUp(0.3)}
-      initial="hidden"
-      animate={controls}
-      className="text-white select-none leading-none"
-      style={{
-        fontSize: "clamp(5rem, 13.5vw, 13.5rem)",
-        letterSpacing: "0.06em",
-        fontStretch: "condensed",
-        textTransform: "uppercase",
-        fontFamily: "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif",
-        fontWeight: 300,
-      }}
-    >
-      LUPIN
-    </motion.h1>
+    <div className="relative select-none" style={{ isolation: "isolate" }}>
+
+      {/* ── Smoky atmospheric bloom (outermost, softest) ── */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          inset: "-90% -70%",
+          background:
+            "radial-gradient(ellipse 55% 50% at 50% 50%, rgba(255,255,255,0.045) 0%, transparent 68%)",
+          filter: "blur(55px)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ── Tight bloom — gradient diffusion directly behind text ── */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          inset: "-45% -28%",
+          background:
+            "radial-gradient(ellipse 62% 52% at 50% 50%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 42%, transparent 72%)",
+          filter: "blur(22px)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ── Glitch layer 1 — top ~45% slice, drifts right ── */}
+      <motion.div
+        animate={glitch1Ctrl}
+        initial={{ x: 0, opacity: 0 }}
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ clipPath: "inset(0 0 56% 0)" }}
+        aria-hidden="true"
+      >
+        <span className="text-white" style={baseStyle}>LUPIN</span>
+      </motion.div>
+
+      {/* ── Glitch layer 2 — bottom ~52% slice, drifts left ── */}
+      <motion.div
+        animate={glitch2Ctrl}
+        initial={{ x: 0, opacity: 0 }}
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ clipPath: "inset(46% 0 0 0)" }}
+        aria-hidden="true"
+      >
+        <span className="text-white" style={baseStyle}>LUPIN</span>
+      </motion.div>
+
+      {/* ── Glitch layer 3 — thin mid-slice (35–65%), subtle diagonal drift ── */}
+      <motion.div
+        animate={glitch3Ctrl}
+        initial={{ x: 0, y: 0, opacity: 0 }}
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ clipPath: "inset(34% 0 34% 0)", filter: "blur(1px)" }}
+        aria-hidden="true"
+      >
+        <span className="text-white" style={{ ...baseStyle, opacity: 0.7 }}>LUPIN</span>
+      </motion.div>
+
+      {/* ── Base text (the visible layer) ── */}
+      <motion.h1
+        variants={fadeUp(0.3)}
+        initial="hidden"
+        animate={controls}
+        className="text-white relative"
+        style={{
+          ...baseStyle,
+          textShadow:
+            "0 0 120px rgba(255,255,255,0.14), 0 0 48px rgba(255,255,255,0.08), 0 0 12px rgba(255,255,255,0.04)",
+          zIndex: 1,
+        }}
+      >
+        LUPIN
+      </motion.h1>
+    </div>
   );
 }
 
@@ -186,6 +290,65 @@ function RightEdgePanel({ delay = 0 }: { delay?: number }) {
       <div className="w-px h-10 bg-white mt-2 self-end" style={{ opacity: 0.1 }} />
       <span className="microtext" style={{ opacity: 0.22 }}>NODE:443</span>
       <span className="microtext" style={{ opacity: 0.22 }}>ACCESS /SYS</span>
+    </motion.div>
+  );
+}
+
+// ── Scrolling market feed ticker ──────────────────────────────────────────────
+const TICKER_ITEMS = [
+  "SPX  5,248.32  +0.83%",
+  "·",
+  "NDX  18,422.17  +1.12%",
+  "·",
+  "EUR/USD  1.0847  −0.14%",
+  "·",
+  "XAU/USD  2,331.40  +0.27%",
+  "·",
+  "BTC/USD  68,420.00  +2.18%",
+  "·",
+  "ETH/USD  3,891.22  +1.74%",
+  "·",
+  "DXY  104.82  −0.09%",
+  "·",
+  "VIX  13.40  −0.87%",
+  "·",
+  "OIL/WTI  82.14  +0.52%",
+  "·",
+  "MARKET FEED LIVE",
+  "·",
+  "NODE /2045",
+  "·",
+  "SIGNAL DETECTED",
+  "·",
+];
+
+function MarketTicker({ delay = 0 }: { delay?: number }) {
+  const tickerText = TICKER_ITEMS.join("   ");
+  // Duplicate for seamless loop
+  const doubled = `${tickerText}   ${tickerText}`;
+
+  return (
+    <motion.div
+      variants={fadeIn(delay)}
+      initial="hidden"
+      animate="visible"
+      className="absolute bottom-16 left-0 right-0 overflow-hidden pointer-events-none"
+      aria-hidden="true"
+    >
+      <div
+        className="ticker-scroll inline-block"
+        style={{
+          fontSize: "0.48rem",
+          letterSpacing: "0.20em",
+          textTransform: "uppercase",
+          fontFamily: "'Space Grotesk', 'Courier New', monospace",
+          fontWeight: 300,
+          color: "rgba(255,255,255,0.22)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {doubled}
+      </div>
     </motion.div>
   );
 }
@@ -340,6 +503,9 @@ export default function HeroSection() {
       >
         <span className="microtext">ACCESS NODE /2045 · SIGNAL DETECTED</span>
       </motion.div>
+
+      {/* ── Scrolling market feed ticker ── */}
+      <MarketTicker delay={2.0} />
     </section>
   );
 }
