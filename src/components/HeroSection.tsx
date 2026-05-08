@@ -166,10 +166,6 @@ function LupinTitle() {
   );
 }
 
-// ── Edge coordinate panel (left) ─────────────────────────────────────────────
-// ── Edge coordinate panel (right) ────────────────────────────────────────────
-// ── Scrolling market feed ticker ──────────────────────────────────────────────
-
 // ── Main hero ────────────────────────────────────────────────────────────────
 export default function HeroSection() {
   return (

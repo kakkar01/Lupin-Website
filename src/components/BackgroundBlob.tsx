@@ -263,7 +263,7 @@ function tickParticles(
   for (const p of motes) {
     p.x += p.vx;
     p.y += p.vy;
-    if (p.y < -8)       { p.y = ch + 4; p.x = Math.random() * cw; }
+    if (p.y < -8)       { p.y = ch + 4; p.x = ((Math.sin(p.ph * 7.3) + 1) * 0.5) * cw; }
     if (p.x < -8)         p.x = cw + 4;
     if (p.x > cw + 8)     p.x = -4;
     const flicker = (Math.sin(time * 1.6 + p.ph) + 1) * 0.5;
