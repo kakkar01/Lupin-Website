@@ -60,11 +60,11 @@ body {
 }
 
 .microtext {
-  font-size: 0.55rem;
-  letter-spacing: 0.22em;
+  font-size: 0.52rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  opacity: 0.55;
-  font-weight: 400;
+  opacity: 0.5;
+  font-weight: 300;
 }
 
 /* ─── Dotted matrix ───────────────────────────────────────── */
@@ -78,13 +78,13 @@ body {
 .dot-matrix span {
   width: 4px;
   height: 4px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.45);
   border-radius: 50%;
 }
 
 /* ─── Scanline effect ─────────────────────────────────────── */
-@keyframes scanline {
-  0% { background-position: 0 0; }
+@keyframes scanlineDrift {
+  0%   { background-position: 0 0; }
   100% { background-position: 0 100vh; }
 }
 
@@ -97,7 +97,8 @@ body {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
+    rgba(0,0,0,0.025) 2px,
+    rgba(0,0,0,0.025) 4px
   );
+  animation: scanlineDrift 12s linear infinite;
 }

@@ -17,7 +17,7 @@ const fadeIn = (delay = 0): Variants => ({
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { duration: 1.2, ease: "easeOut" as const, delay } as Transition,
+    transition: { duration: 1.4, ease: "easeOut" as const, delay } as Transition,
   },
 });
 
@@ -32,17 +32,17 @@ function LeftBadge({ delay = 0 }: { delay?: number }) {
     >
       <span
         className="text-white font-light tracking-widest"
-        style={{ fontSize: "clamp(0.75rem, 1.2vw, 1rem)", letterSpacing: "0.12em" }}
+        style={{ fontSize: "clamp(0.7rem, 1.1vw, 0.9rem)", letterSpacing: "0.14em" }}
       >
         A/
       </span>
       <div className="flex items-center gap-[5px]">
-        <div className="w-[9px] h-[9px] rounded-full bg-white opacity-90" />
-        <div className="w-[9px] h-[9px] rounded-full bg-white opacity-90" />
+        <div className="w-[7px] h-[7px] rounded-full bg-white opacity-80" />
+        <div className="w-[7px] h-[7px] rounded-full bg-white opacity-80" />
       </div>
       <span
         className="text-white font-light"
-        style={{ fontSize: "clamp(0.75rem, 1.2vw, 1rem)", letterSpacing: "0.08em" }}
+        style={{ fontSize: "clamp(0.7rem, 1.1vw, 0.9rem)", letterSpacing: "0.08em" }}
       >
         1
       </span>
@@ -60,14 +60,14 @@ function DotMatrix({ delay = 0 }: { delay?: number }) {
       initial="hidden"
       animate="visible"
       className="grid gap-[4px]"
-      style={{ gridTemplateColumns: `repeat(${cols}, 5px)`, gridTemplateRows: `repeat(${rows}, 5px)` }}
+      style={{ gridTemplateColumns: `repeat(${cols}, 4px)`, gridTemplateRows: `repeat(${rows}, 4px)` }}
       aria-hidden="true"
     >
       {Array.from({ length: cols * rows }).map((_, i) => (
         <div
           key={i}
-          className="w-[5px] h-[5px] rounded-full"
-          style={{ background: "rgba(255,255,255,0.55)" }}
+          className="w-[4px] h-[4px] rounded-full"
+          style={{ background: "rgba(255,255,255,0.45)" }}
         />
       ))}
     </motion.div>
@@ -83,12 +83,10 @@ function MarkerCluster({ delay = 0 }: { delay?: number }) {
       animate="visible"
       className="flex items-center gap-4"
     >
-      {/* White rect */}
       <div
-        className="bg-white opacity-80"
-        style={{ width: "clamp(28px, 3.5vw, 42px)", height: "clamp(12px, 1.4vw, 16px)" }}
+        className="bg-white opacity-70"
+        style={{ width: "clamp(24px, 3vw, 38px)", height: "clamp(10px, 1.2vw, 14px)" }}
       />
-      {/* Dot matrix */}
       <DotMatrix delay={delay + 0.12} />
     </motion.div>
   );
@@ -120,15 +118,13 @@ function LupinTitle() {
   useEffect(() => {
     let mounted = true;
     const run = async () => {
-      // Initial fade-in
       await controls.start("visible");
-      // Periodic flicker
       while (mounted) {
-        await new Promise((r) => setTimeout(r, 3000 + Math.random() * 4000));
+        await new Promise((r) => setTimeout(r, 3500 + Math.random() * 5000));
         if (!mounted) break;
         await controls.start({
-          opacity: [1, 0.4, 1, 0.6, 1],
-          transition: { duration: 0.18, ease: "linear" as const },
+          opacity: [1, 0.35, 1, 0.55, 1],
+          transition: { duration: 0.16, ease: "linear" as const },
         });
       }
     };
@@ -141,18 +137,56 @@ function LupinTitle() {
       variants={fadeUp(0.3)}
       initial="hidden"
       animate={controls}
-      className="text-white font-bold select-none leading-none"
+      className="text-white select-none leading-none"
       style={{
-        fontSize: "clamp(5.5rem, 14vw, 14rem)",
-        letterSpacing: "-0.02em",
+        fontSize: "clamp(5rem, 13.5vw, 13.5rem)",
+        letterSpacing: "0.06em",
         fontStretch: "condensed",
         textTransform: "uppercase",
         fontFamily: "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif",
-        fontWeight: 700,
+        fontWeight: 300,
       }}
     >
       LUPIN
     </motion.h1>
+  );
+}
+
+// ── Edge coordinate panel (left) ─────────────────────────────────────────────
+function LeftEdgePanel({ delay = 0 }: { delay?: number }) {
+  return (
+    <motion.div
+      variants={fadeIn(delay)}
+      initial="hidden"
+      animate="visible"
+      className="absolute left-8 top-1/2 -translate-y-1/2 flex flex-col gap-[6px] pointer-events-none"
+      aria-hidden="true"
+    >
+      <span className="microtext" style={{ opacity: 0.28 }}>47.2891°N</span>
+      <span className="microtext" style={{ opacity: 0.28 }}>122.4194°W</span>
+      <div className="w-px h-10 bg-white mt-2" style={{ opacity: 0.1 }} />
+      <span className="microtext" style={{ opacity: 0.22 }}>LAYER::02</span>
+      <span className="microtext" style={{ opacity: 0.22 }}>SIGNAL LOCKED</span>
+    </motion.div>
+  );
+}
+
+// ── Edge coordinate panel (right) ────────────────────────────────────────────
+function RightEdgePanel({ delay = 0 }: { delay?: number }) {
+  return (
+    <motion.div
+      variants={fadeIn(delay)}
+      initial="hidden"
+      animate="visible"
+      className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-end gap-[6px] pointer-events-none"
+      aria-hidden="true"
+    >
+      <span className="microtext" style={{ opacity: 0.28 }}>UTC+0000</span>
+      <span className="microtext" style={{ opacity: 0.28 }}>EPOCH:2045</span>
+      <div className="w-px h-10 bg-white mt-2 self-end" style={{ opacity: 0.1 }} />
+      <span className="microtext" style={{ opacity: 0.22 }}>NODE:443</span>
+      <span className="microtext" style={{ opacity: 0.22 }}>ACCESS /SYS</span>
+    </motion.div>
   );
 }
 
@@ -162,31 +196,24 @@ export default function HeroSection() {
     <section className="relative w-full h-screen flex flex-col justify-center overflow-hidden z-10">
       {/* ── Horizontal mid-bar ── */}
       <div className="relative w-full flex items-center">
-        {/* Thin full-width horizontal rule */}
         <motion.div
           variants={fadeIn(0.8)}
           initial="hidden"
           animate="visible"
           className="absolute left-0 right-0 h-px"
-          style={{ background: "rgba(255,255,255,0.07)" }}
+          style={{ background: "rgba(255,255,255,0.06)" }}
           aria-hidden="true"
         />
 
-        {/* Content row */}
         <div
           className="relative w-full flex items-center justify-between"
           style={{ padding: "0 clamp(1.5rem, 5vw, 5rem)" }}
         >
-          {/* LEFT: A/ ●● 1 + microtext */}
           <div className="flex items-center gap-8">
             <LeftBadge delay={0.6} />
             <MicroInfo delay={0.75} />
           </div>
-
-          {/* CENTER: marker cluster */}
           <MarkerCluster delay={0.9} />
-
-          {/* RIGHT: A/ ●● 1 mirror */}
           <LeftBadge delay={0.6} />
         </div>
       </div>
@@ -196,10 +223,9 @@ export default function HeroSection() {
         className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
         style={{ gap: "clamp(0.5rem, 1.5vw, 1.2rem)" }}
       >
-        {/* Floating wrapper */}
         <motion.div
-          animate={{ y: [0, -8, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ y: [0, -7, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           className="flex flex-col items-center"
           style={{ gap: "clamp(0.4rem, 1.2vw, 1rem)" }}
         >
@@ -209,11 +235,12 @@ export default function HeroSection() {
             variants={fadeUp(0.55)}
             initial="hidden"
             animate="visible"
-            className="text-white tracking-ultra uppercase text-center font-light"
+            className="text-white tracking-ultra uppercase text-center"
             style={{
-              fontSize: "clamp(0.6rem, 1.1vw, 0.9rem)",
-              letterSpacing: "0.38em",
-              opacity: 0.7,
+              fontSize: "clamp(0.55rem, 1vw, 0.82rem)",
+              letterSpacing: "0.42em",
+              opacity: 0.55,
+              fontWeight: 300,
             }}
           >
             2045 AGENT COMING SOON
@@ -224,7 +251,8 @@ export default function HeroSection() {
             variants={fadeIn(0.7)}
             initial="hidden"
             animate="visible"
-            className="w-16 h-px bg-white opacity-20 mt-1"
+            className="w-12 h-px bg-white mt-1"
+            style={{ opacity: 0.15 }}
             aria-hidden="true"
           />
 
@@ -235,60 +263,71 @@ export default function HeroSection() {
             animate="visible"
             className="flex gap-8 mt-1"
           >
-            <span className="microtext">FORWARD</span>
-            <span className="microtext">ZERO ZERO ONE</span>
+            <span className="microtext" style={{ opacity: 0.4 }}>FORWARD</span>
+            <span className="microtext" style={{ opacity: 0.4 }}>ZERO ZERO ONE</span>
           </motion.div>
         </motion.div>
       </motion.div>
 
-      {/* ── Scanline decorative corners ── */}
-      {/* Top-left corner bracket */}
+      {/* ── Left/Right edge panels ── */}
+      <LeftEdgePanel delay={1.4} />
+      <RightEdgePanel delay={1.4} />
+
+      {/* ── Corner brackets ── */}
       <motion.div
         variants={fadeIn(1.1)}
         initial="hidden"
         animate="visible"
         className="absolute top-8 left-8 pointer-events-none"
         aria-hidden="true"
-        style={{ opacity: 0.3 }}
+        style={{ opacity: 0.25 }}
       >
         <div className="w-5 h-px bg-white" />
         <div className="w-px h-5 bg-white" />
       </motion.div>
-      {/* Top-right corner bracket */}
       <motion.div
         variants={fadeIn(1.1)}
         initial="hidden"
         animate="visible"
         className="absolute top-8 right-8 pointer-events-none flex flex-col items-end"
         aria-hidden="true"
-        style={{ opacity: 0.3 }}
+        style={{ opacity: 0.25 }}
       >
         <div className="w-5 h-px bg-white" />
         <div className="w-px h-5 bg-white self-end" />
       </motion.div>
-      {/* Bottom-left */}
       <motion.div
         variants={fadeIn(1.1)}
         initial="hidden"
         animate="visible"
         className="absolute bottom-8 left-8 pointer-events-none flex flex-col justify-end"
         aria-hidden="true"
-        style={{ opacity: 0.3 }}
+        style={{ opacity: 0.25 }}
       >
         <div className="w-px h-5 bg-white" />
         <div className="w-5 h-px bg-white" />
       </motion.div>
-      {/* Bottom-right */}
       <motion.div
         variants={fadeIn(1.1)}
         initial="hidden"
         animate="visible"
         className="absolute bottom-8 right-8 pointer-events-none flex flex-col items-end justify-end"
         aria-hidden="true"
-        style={{ opacity: 0.3 }}
+        style={{ opacity: 0.25 }}
       >
         <div className="w-px h-5 bg-white self-end" />
         <div className="w-5 h-px bg-white" />
+      </motion.div>
+
+      {/* ── Top status line ── */}
+      <motion.div
+        variants={fadeIn(1.5)}
+        initial="hidden"
+        animate="visible"
+        className="absolute top-8 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{ opacity: 0.28 }}
+      >
+        <span className="microtext">SYSTEM ONLINE — INIT 001</span>
       </motion.div>
 
       {/* ── Bottom status line ── */}
@@ -297,9 +336,9 @@ export default function HeroSection() {
         initial="hidden"
         animate="visible"
         className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
-        style={{ opacity: 0.35 }}
+        style={{ opacity: 0.3 }}
       >
-        <span className="microtext">SYSTEM ONLINE · INIT 001</span>
+        <span className="microtext">ACCESS NODE /2045 · SIGNAL DETECTED</span>
       </motion.div>
     </section>
   );
