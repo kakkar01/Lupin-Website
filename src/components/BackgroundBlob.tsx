@@ -3,11 +3,12 @@
 import { useEffect, useRef } from "react";
 
 // ── Wireframe market terrain parameters ──────────────────────────────────────
-const COLS = 30;
-const ROWS = 22;
-const X_HALF = 11;   // terrain X half-span in 3-D units
-const Z_NEAR = 2.4;
-const Z_FAR  = 14.0;
+const COLS           = 30;
+const ROWS           = 22;
+const X_HALF         = 11;   // terrain X half-span in 3-D units
+const Z_NEAR         = 2.4;
+const Z_FAR          = 14.0;
+const PARTICLE_COUNT = 65;
 
 // Composite sine-wave height field — feels like a live price-action landscape
 function terrainHeight(col: number, row: number, t: number): number {
@@ -52,7 +53,7 @@ export default function BackgroundBlob() {
 
     // Scattered ambient data-particles
     interface Particle { x: number; y: number; z: number; baseOp: number; phase: number }
-    const particles: Particle[] = Array.from({ length: 65 }, () => ({
+    const particles: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => ({
       x:      (Math.random() - 0.5) * X_HALF * 2.4,
       y:      (Math.random() - 0.5) * 0.9,
       z:      Z_NEAR + Math.random() * (Z_FAR - Z_NEAR),

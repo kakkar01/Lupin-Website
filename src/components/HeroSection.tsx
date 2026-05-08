@@ -336,7 +336,7 @@ function MarketTicker({ delay = 0 }: { delay?: number }) {
       aria-hidden="true"
     >
       <div
-        className="ticker-scroll inline-block"
+        className="ticker-scroll"
         style={{
           fontSize: "0.48rem",
           letterSpacing: "0.20em",

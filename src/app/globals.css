@@ -110,6 +110,7 @@ body {
 }
 
 .ticker-scroll {
+  display: inline-block;
   animation: tickerMarquee 55s linear infinite;
   white-space: nowrap;
 }
