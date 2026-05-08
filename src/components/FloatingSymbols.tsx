@@ -71,33 +71,39 @@ export default function FloatingSymbols() {
       style={{ zIndex: 5 }}
       aria-hidden="true"
     >
-      {items.map((item) => (
-        <motion.span
-          key={item.id}
-          className="absolute text-white select-none whitespace-nowrap"
-          style={{
-            left: `${item.startX}%`,
-            top: `${item.startY}%`,
-            fontSize: item.size,
-            letterSpacing: "0.12em",
-            fontFamily: "'Space Grotesk', 'Courier New', monospace",
-            fontWeight: 300,
-          }}
-          animate={{
-            x: [0, item.driftX, 0],
-            y: [0, item.driftY, 0],
-            opacity: [item.opacity, item.opacity * 0.45, item.opacity],
-          }}
-          transition={{
-            duration: item.duration,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: item.delay,
-          }}
-        >
-          {item.text}
-        </motion.span>
-      ))}
+      {items.map((item) => {
+        // Assign blur based on item id to create depth variety
+        const blurLevels = [0, 0, 0.5, 1, 1.5, 2, 3];
+        const blur = blurLevels[item.id % blurLevels.length];
+        return (
+          <motion.span
+            key={item.id}
+            className="absolute text-white select-none whitespace-nowrap"
+            style={{
+              left: `${item.startX}%`,
+              top: `${item.startY}%`,
+              fontSize: item.size,
+              letterSpacing: "0.12em",
+              fontFamily: "'Space Grotesk', 'Courier New', monospace",
+              fontWeight: 300,
+              filter: blur > 0 ? `blur(${blur}px)` : undefined,
+            }}
+            animate={{
+              x: [0, item.driftX, 0],
+              y: [0, item.driftY, 0],
+              opacity: [item.opacity, item.opacity * 0.45, item.opacity],
+            }}
+            transition={{
+              duration: item.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: item.delay,
+            }}
+          >
+            {item.text}
+          </motion.span>
+        );
+      })}
     </div>
   );
 }
