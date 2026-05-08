@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 
 const SYMBOL_POOL = [
   "$", "€", "¥", "₹", "₿", "£", "₩",
@@ -46,23 +46,25 @@ export default function FloatingSymbols() {
       return next;
     };
 
-    setItems(
-      Array.from({ length: 32 }, (_, i) => {
-        const r = seed(i);
-        return {
-          id: i,
-          text: SYMBOL_POOL[i % SYMBOL_POOL.length],
-          startX: r() * 100,
-          startY: r() * 100,
-          opacity: 0.04 + r() * 0.08,   // 4 – 12 %
-          size: 7 + r() * 6,             // 7 – 13 px
-          duration: 22 + r() * 28,       // 22 – 50 s
-          delay: -(r() * 40),            // start mid-cycle
-          driftX: (r() - 0.5) * 55,
-          driftY: (r() - 0.5) * 75,
-        };
-      })
-    );
+    startTransition(() => {
+      setItems(
+        Array.from({ length: 32 }, (_, i) => {
+          const r = seed(i);
+          return {
+            id: i,
+            text: SYMBOL_POOL[i % SYMBOL_POOL.length],
+            startX: r() * 100,
+            startY: r() * 100,
+            opacity: 0.04 + r() * 0.08,   // 4 – 12 %
+            size: 7 + r() * 6,             // 7 – 13 px
+            duration: 22 + r() * 28,       // 22 – 50 s
+            delay: -(r() * 40),            // start mid-cycle
+            driftX: (r() - 0.5) * 55,
+            driftY: (r() - 0.5) * 75,
+          };
+        })
+      );
+    });
   }, []);
 
   return (

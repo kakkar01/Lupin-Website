@@ -1,271 +1,262 @@
 "use client";
 
-import { motion, useAnimationControls, type Variants, type Transition } from "framer-motion";
-import { useEffect } from "react";
+import { motion } from "framer-motion";
 
-// ── Shared motion variants ────────────────────────────────────────────────────
-const fadeUp = (delay = 0): Variants => ({
-  hidden: { opacity: 0, y: 18 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay } as Transition,
-  },
-});
-
-const fadeIn = (delay = 0): Variants => ({
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 1.4, ease: "easeOut" as const, delay } as Transition,
-  },
-});
-
-// ── Glitch LUPIN title ───────────────────────────────────────────────────────
-function LupinTitle() {
-  const controls       = useAnimationControls();
-  const glitch1Ctrl    = useAnimationControls();
-  const glitch2Ctrl    = useAnimationControls();
-  const glitch3Ctrl    = useAnimationControls();
-
-  useEffect(() => {
-    let mounted = true;
-
-    const run = async () => {
-      await controls.start("visible");
-
-      while (mounted) {
-        // Random quiet window between glitch bursts
-        await new Promise((r) => setTimeout(r, 2800 + Math.random() * 4200));
-        if (!mounted) break;
-
-        const burstCount = 1 + Math.floor(Math.random() * 3);
-        for (let g = 0; g < burstCount; g++) {
-          const dur = 0.08 + Math.random() * 0.10;
-          await Promise.all([
-            controls.start({
-              opacity: [1, 0.55, 1, 0.75, 1],
-              transition: { duration: dur + 0.04, ease: "linear" as const },
-            }),
-            glitch1Ctrl.start({
-              x:       [-5, 7, -3, 0],
-              opacity: [0, 0.45, 0.22, 0],
-              transition: { duration: dur, ease: "linear" as const },
-            }),
-            glitch2Ctrl.start({
-              x:       [4, -8, 3, 0],
-              opacity: [0, 0.35, 0.18, 0],
-              transition: { duration: dur * 0.85, ease: "linear" as const },
-            }),
-            glitch3Ctrl.start({
-              x:       [-2, 4, -1, 0],
-              y:       [1, -2, 1, 0],
-              opacity: [0, 0.20, 0.10, 0],
-              transition: { duration: dur * 1.1, ease: "linear" as const },
-            }),
-          ]);
-          if (g < burstCount - 1) {
-            await new Promise((r) => setTimeout(r, 40 + Math.random() * 120));
-          }
-        }
-      }
-    };
-
-    run();
-    return () => { mounted = false; };
-  }, [controls, glitch1Ctrl, glitch2Ctrl, glitch3Ctrl]);
-
-  const baseStyle: React.CSSProperties = {
-    fontSize:      "clamp(5rem, 13.5vw, 13.5rem)",
-    letterSpacing: "0.06em",
-    fontStretch:   "condensed",
-    textTransform: "uppercase",
-    fontFamily:    "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif",
-    fontWeight:    300,
-    lineHeight:    1,
-    whiteSpace:    "nowrap",
-    display:       "block",
-  };
-
+// ── Micro-grid overlay ────────────────────────────────────────────────────────
+function MicroGrid() {
   return (
-    <div className="relative select-none" style={{ isolation: "isolate" }}>
+    <div
+      className="fixed inset-0 pointer-events-none z-[2]"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px)
+        `,
+        backgroundSize: "56px 56px",
+        maskImage:
+          "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 20%, rgba(0,0,0,0.6) 55%, black 100%)",
+        WebkitMaskImage:
+          "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 20%, rgba(0,0,0,0.6) 55%, black 100%)",
+      }}
+      aria-hidden="true"
+    />
+  );
+}
 
-      {/* ── Smoky atmospheric bloom (outermost, softest) ── */}
+// ── Horizontal light streak ───────────────────────────────────────────────────
+function LightStreak() {
+  return (
+    <motion.div
+      className="absolute inset-x-0 pointer-events-none"
+      style={{ top: "50%", translateY: "-50%" }}
+      aria-hidden="true"
+    >
+      {/* Wide ambient smear */}
+      <motion.div
+        className="w-full"
+        style={{
+          height: 120,
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.11) 50%, rgba(255,255,255,0.05) 75%, transparent 100%)",
+          filter: "blur(18px)",
+        }}
+        animate={{ opacity: [0.5, 1, 0.5], scaleX: [0.85, 1.08, 0.85] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Thin crisp streak */}
+      <motion.div
+        className="absolute inset-x-0"
+        style={{
+          top: "50%",
+          height: 1,
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 30%, rgba(255,255,255,0.32) 50%, rgba(255,255,255,0.18) 70%, transparent 100%)",
+          filter: "blur(1px)",
+        }}
+        animate={{ opacity: [0.3, 0.8, 0.3] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+      />
+    </motion.div>
+  );
+}
+
+// ── LUPIN disintegration title ────────────────────────────────────────────────
+const LETTERS = ["L", "U", "P", "I", "N"] as const;
+const CYCLE   = 22; // seconds per full loop
+
+// ── Shared typography constant ────────────────────────────────────────────────
+const FONT_STACK = "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif";
+
+const baseStyle: React.CSSProperties = {
+  fontSize:      "clamp(5rem, 13.5vw, 13.5rem)",
+  fontWeight:    300,
+  fontFamily:    FONT_STACK,
+  lineHeight:    1,
+  display:       "inline-block",
+  textShadow:
+    "0 0 120px rgba(255,255,255,0.14), 0 0 48px rgba(255,255,255,0.08), 0 0 12px rgba(255,255,255,0.04)",
+};
+
+function LupinDisintegrate() {
+  return (
+    <div
+      className="relative select-none flex"
+      style={{ letterSpacing: "0.06em", isolation: "isolate" }}
+    >
+      {/* Soft bloom behind text */}
       <div
         className="absolute pointer-events-none"
         style={{
-          inset: "-90% -70%",
+          inset: "-50% -30%",
           background:
-            "radial-gradient(ellipse 55% 50% at 50% 50%, rgba(255,255,255,0.045) 0%, transparent 68%)",
-          filter: "blur(55px)",
+            "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 45%, transparent 70%)",
+          filter: "blur(24px)",
         }}
         aria-hidden="true"
       />
 
-      {/* ── Tight bloom — gradient diffusion directly behind text ── */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          inset: "-45% -28%",
-          background:
-            "radial-gradient(ellipse 62% 52% at 50% 50%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 42%, transparent 72%)",
-          filter: "blur(22px)",
-        }}
-        aria-hidden="true"
-      />
+      {LETTERS.map((letter, i) => {
+        // Staggered disintegration timing — each letter is 1.1 s apart
+        const stagger    = i * 1.1;
+        const t1 = (3.5 + stagger) / CYCLE; // start of disintegration
+        const t2 = (5.5 + stagger) / CYCLE; // mid (blurring)
+        const t3 = (8.0 + stagger) / CYCLE; // fully gone
+        const t4 = 0.84;                     // still gone
+        const t5 = 0.91;                     // reappear
+        const t6 = 1.00;                     // stable / cycle end
 
-      {/* ── Glitch layer 1 — top ~45% slice, drifts right ── */}
-      <motion.div
-        animate={glitch1Ctrl}
-        initial={{ x: 0, opacity: 0 }}
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ clipPath: "inset(0 0 56% 0)" }}
-        aria-hidden="true"
-      >
-        <span className="text-white" style={baseStyle}>LUPIN</span>
-      </motion.div>
+        // Drift direction alternates per letter
+        const dx = i % 2 === 0 ? 10 : -10;
 
-      {/* ── Glitch layer 2 — bottom ~52% slice, drifts left ── */}
-      <motion.div
-        animate={glitch2Ctrl}
-        initial={{ x: 0, opacity: 0 }}
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ clipPath: "inset(46% 0 0 0)" }}
-        aria-hidden="true"
-      >
-        <span className="text-white" style={baseStyle}>LUPIN</span>
-      </motion.div>
-
-      {/* ── Glitch layer 3 — thin mid-slice (35–65%), subtle diagonal drift ── */}
-      <motion.div
-        animate={glitch3Ctrl}
-        initial={{ x: 0, y: 0, opacity: 0 }}
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ clipPath: "inset(34% 0 34% 0)", filter: "blur(1px)" }}
-        aria-hidden="true"
-      >
-        <span className="text-white" style={{ ...baseStyle, opacity: 0.7 }}>LUPIN</span>
-      </motion.div>
-
-      {/* ── Base text (the visible layer) ── */}
-      <motion.h1
-        variants={fadeUp(0.3)}
-        initial="hidden"
-        animate={controls}
-        className="text-white relative"
-        style={{
-          ...baseStyle,
-          textShadow:
-            "0 0 120px rgba(255,255,255,0.14), 0 0 48px rgba(255,255,255,0.08), 0 0 12px rgba(255,255,255,0.04)",
-          zIndex: 1,
-        }}
-      >
-        LUPIN
-      </motion.h1>
+        return (
+          <motion.span
+            key={i}
+            className="text-white"
+            style={baseStyle}
+            initial={{ opacity: 0, filter: "blur(14px)", y: 12 }}
+            animate={{
+              opacity: [0, 1,    1,    0.75, 0,         0,    1,    1],
+              filter:  [
+                "blur(14px)",
+                "blur(0px)",
+                "blur(0px)",
+                "blur(5px)",
+                "blur(22px)",
+                "blur(22px)",
+                "blur(4px)",
+                "blur(0px)",
+              ],
+              x: [0, 0, 0, dx * 0.4, dx, dx, 0, 0],
+              y: [12, 0, 0, -3,       -9, -9, 0, 0],
+            }}
+            transition={{
+              duration: CYCLE,
+              times:    [0, 0.08, t1, t2, t3, t4, t5, t6],
+              ease:     "easeInOut",
+              repeat:   Infinity,
+            }}
+          >
+            {letter}
+          </motion.span>
+        );
+      })}
     </div>
   );
 }
 
-// ── Main hero ────────────────────────────────────────────────────────────────
+// ── Main hero section ─────────────────────────────────────────────────────────
+const fadeUp = (delay = 0) => ({
+  hidden:  { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y:       0,
+    transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] as const, delay },
+  },
+});
+
+const fadeIn = (delay = 0) => ({
+  hidden:  { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 1.6, ease: "easeOut" as const, delay },
+  },
+});
+
 export default function HeroSection() {
   return (
-    <section className="relative w-full h-screen flex flex-col justify-center overflow-hidden z-10">
-      {/* ── Central typography block ── */}
-      <motion.div
-        className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
-        style={{ gap: "clamp(0.5rem, 1.5vw, 1.2rem)" }}
-      >
+    <>
+      <MicroGrid />
+
+      <section className="relative w-full h-screen flex flex-col justify-center overflow-hidden z-10">
+        {/* ── Light streak behind text ── */}
+        <LightStreak />
+
+        {/* ── Central typography block ── */}
         <motion.div
-          animate={{ y: [0, -7, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center"
-          style={{ gap: "clamp(0.4rem, 1.2vw, 1rem)" }}
+          className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
         >
-          <LupinTitle />
-
-          <motion.p
-            variants={fadeUp(0.55)}
-            initial="hidden"
-            animate="visible"
-            className="text-white tracking-ultra uppercase text-center"
-            style={{
-              fontSize: "clamp(0.55rem, 1vw, 0.82rem)",
-              letterSpacing: "0.42em",
-              opacity: 0.55,
-              fontWeight: 300,
-            }}
-          >
-            2045 // INSTINCT ACTIVE
-          </motion.p>
-
-          {/* Thin divider */}
           <motion.div
-            variants={fadeIn(0.7)}
-            initial="hidden"
-            animate="visible"
-            className="w-12 h-px bg-white mt-1"
-            style={{ opacity: 0.15 }}
-            aria-hidden="true"
-          />
-
-          {/* Microtext pair */}
-          <motion.div
-            variants={fadeUp(0.85)}
-            initial="hidden"
-            animate="visible"
-            className="flex gap-8 mt-1"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center"
+            style={{ gap: "clamp(0.5rem, 1.4vw, 1.1rem)" }}
           >
-            <span className="microtext" style={{ opacity: 0.4 }}>FORWARD</span>
-            <span className="microtext" style={{ opacity: 0.4 }}>ZERO ZERO ONE</span>
+            <LupinDisintegrate />
+
+            {/* Subtitle */}
+            <motion.p
+              variants={fadeUp(0.6)}
+              initial="hidden"
+              animate="visible"
+              className="text-white text-center uppercase"
+              style={{
+                fontSize:      "clamp(0.52rem, 0.9vw, 0.78rem)",
+                letterSpacing: "0.44em",
+                opacity:       0.50,
+                fontWeight:    300,
+                fontFamily:    FONT_STACK,
+              }}
+            >
+              2045 AGENT COMING SOON
+            </motion.p>
+
+            {/* Thin divider */}
+            <motion.div
+              variants={fadeIn(0.9)}
+              initial="hidden"
+              animate="visible"
+              className="w-10 h-px bg-white"
+              style={{ opacity: 0.12 }}
+              aria-hidden="true"
+            />
           </motion.div>
         </motion.div>
-      </motion.div>
 
-      {/* ── Corner brackets ── */}
-      <motion.div
-        variants={fadeIn(1.1)}
-        initial="hidden"
-        animate="visible"
-        className="absolute top-8 left-8 pointer-events-none"
-        aria-hidden="true"
-        style={{ opacity: 0.25 }}
-      >
-        <div className="w-5 h-px bg-white" />
-        <div className="w-px h-5 bg-white" />
-      </motion.div>
-      <motion.div
-        variants={fadeIn(1.1)}
-        initial="hidden"
-        animate="visible"
-        className="absolute top-8 right-8 pointer-events-none flex flex-col items-end"
-        aria-hidden="true"
-        style={{ opacity: 0.25 }}
-      >
-        <div className="w-5 h-px bg-white" />
-        <div className="w-px h-5 bg-white self-end" />
-      </motion.div>
-      <motion.div
-        variants={fadeIn(1.1)}
-        initial="hidden"
-        animate="visible"
-        className="absolute bottom-8 left-8 pointer-events-none flex flex-col justify-end"
-        aria-hidden="true"
-        style={{ opacity: 0.25 }}
-      >
-        <div className="w-px h-5 bg-white" />
-        <div className="w-5 h-px bg-white" />
-      </motion.div>
-      <motion.div
-        variants={fadeIn(1.1)}
-        initial="hidden"
-        animate="visible"
-        className="absolute bottom-8 right-8 pointer-events-none flex flex-col items-end justify-end"
-        aria-hidden="true"
-        style={{ opacity: 0.25 }}
-      >
-        <div className="w-px h-5 bg-white self-end" />
-        <div className="w-5 h-px bg-white" />
-      </motion.div>
-    </section>
+        {/* ── Corner brackets ── */}
+        {(["tl", "tr", "bl", "br"] as const).map((pos) => (
+          <motion.div
+            key={pos}
+            variants={fadeIn(1.3)}
+            initial="hidden"
+            animate="visible"
+            className={[
+              "absolute pointer-events-none",
+              pos.startsWith("t") ? "top-8" : "bottom-8",
+              pos.endsWith("l")  ? "left-8" : "right-8",
+              pos === "tr" || pos === "br" ? "flex flex-col items-end" : "",
+              pos === "bl" ? "flex flex-col justify-end" : "",
+              pos === "br" ? "flex flex-col items-end justify-end" : "",
+            ].join(" ")}
+            style={{ opacity: 0.22 }}
+            aria-hidden="true"
+          >
+            {pos === "tl" && (
+              <>
+                <div className="w-4 h-px bg-white" />
+                <div className="w-px h-4 bg-white" />
+              </>
+            )}
+            {pos === "tr" && (
+              <>
+                <div className="w-4 h-px bg-white" />
+                <div className="w-px h-4 bg-white self-end" />
+              </>
+            )}
+            {pos === "bl" && (
+              <>
+                <div className="w-px h-4 bg-white" />
+                <div className="w-4 h-px bg-white" />
+              </>
+            )}
+            {pos === "br" && (
+              <>
+                <div className="w-px h-4 bg-white self-end" />
+                <div className="w-4 h-px bg-white" />
+              </>
+            )}
+          </motion.div>
+        ))}
+      </section>
+    </>
   );
 }
