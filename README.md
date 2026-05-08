@@ -2,7 +2,7 @@
 
 > Premium ultra-minimal futuristic landing page. Brutalist + cyberpunk editorial design.
 
-**Stack:** Next.js 15 · TypeScript · Tailwind CSS · Framer Motion · Vercel
+**Stack:** Next.js 16 · TypeScript · Tailwind CSS · Framer Motion · Vercel
 
 ---
 

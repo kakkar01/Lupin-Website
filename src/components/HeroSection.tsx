@@ -103,8 +103,12 @@ function MicroInfo({ delay = 0 }: { delay?: number }) {
       animate="visible"
       className="flex flex-col gap-[3px]"
     >
-      <span className="microtext">LETTER &ldquo;A&rdquo;&nbsp;&nbsp;&nbsp;&nbsp;FORWARD</span>
-      <span className="microtext">SLASH ZERO&nbsp;&nbsp;ZERO ONE</span>
+      <span className="microtext" style={{ gap: "1.5rem", display: "inline-flex" }}>
+        <span>LETTER &quot;A&quot;</span><span>FORWARD</span>
+      </span>
+      <span className="microtext" style={{ gap: "1.5rem", display: "inline-flex" }}>
+        <span>SLASH ZERO</span><span>ZERO ONE</span>
+      </span>
     </motion.div>
   );
 }

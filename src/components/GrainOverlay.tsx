@@ -20,10 +20,10 @@ export default function GrainOverlay() {
     window.addEventListener("resize", resize);
 
     let lastTime = 0;
-    const FPS = 16; // ~60fps flicker
+    const FRAME_INTERVAL_MS = 16; // ~60fps flicker
 
     const render = (time: number) => {
-      if (time - lastTime < FPS) {
+      if (time - lastTime < FRAME_INTERVAL_MS) {
         frameRef.current = requestAnimationFrame(render);
         return;
       }
