@@ -10,6 +10,9 @@ export default function Home() {
       {/* Layer 1: scanlines */}
       <div className="scanlines" aria-hidden="true" />
 
+      {/* Layer 1b: vignette */}
+      <div className="vignette" aria-hidden="true" />
+
       {/* Layer 2: hero UI */}
       <HeroSection />
     </main>
