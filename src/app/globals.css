@@ -103,14 +103,4 @@ body {
   animation: scanlineDrift 12s linear infinite;
 }
 
-/* ─── Market ticker scroll ────────────────────────────────── */
-@keyframes tickerMarquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
 
-.ticker-scroll {
-  display: inline-block;
-  animation: tickerMarquee 55s linear infinite;
-  white-space: nowrap;
-}
