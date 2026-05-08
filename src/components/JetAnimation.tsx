@@ -216,10 +216,17 @@ export default function JetAnimation() {
     window.addEventListener("resize", resize);
 
     // ── Timing — synced to the LUPIN disintegration cycle (22 s) ────────────
-    const LOOP        = 22;   // matches CYCLE in HeroSection
-    const JET_OFFSET  = 3.0;  // jet launches at 3.0 s → on-screen at 3.5 s (when letters blur)
-    const FLIGHT      = 1.0;  // seconds to cross full screen (hypersonic fast)
-    const JET_Y       = 0.44; // vertical position (slightly above centre)
+    const LOOP              = 22;   // matches CYCLE in HeroSection
+    const JET_OFFSET        = 3.0;  // jet launches at 3.0 s; visible by ~3.5 s (approx, varies with screen width)
+    const FLIGHT            = 1.0;  // seconds to cross full screen (hypersonic fast)
+    const JET_Y             = 0.44; // vertical position ratio (slightly above centre)
+    // Scale / geometry constants
+    const SCALE_FACTOR      = 0.044; // jet scale as fraction of canvas width
+    const JET_LENGTH_SCALE  = 8.2;   // fuselage body length in scale units (determines overrun)
+    const SCREEN_PADDING    = 0.05;  // extra offscreen margin so tail is fully hidden before entry
+    // Fade envelope thresholds (as fraction of FLIGHT progress 0→1)
+    const FADE_IN_THRESHOLD  = 0.08; // first 8% of flight: fade in
+    const FADE_OUT_THRESHOLD = 0.85; // last 15% of flight: fade out
 
     const rings: Ring[] = [];
     const startTime = performance.now();
@@ -264,16 +271,16 @@ export default function JetAnimation() {
 
       if (jetTime >= 0 && jetTime < FLIGHT + 0.6) {
         const progress = jetTime / FLIGHT;           // 0 → 1+ across screen
-        const s        = cw * 0.044;                 // larger scale for quality
+        const s        = cw * SCALE_FACTOR;
 
         // Nose from offscreen-left to offscreen-right at high speed
-        const overrun = 8.2 * s + cw * 0.05;
+        const overrun = JET_LENGTH_SCALE * s + cw * SCREEN_PADDING;
         const jetX    = -overrun + (cw + overrun * 2) * Math.min(progress, 1.0);
         const jetY    = ch * JET_Y;
 
-        // Opacity: fade in quickly (first 8%), visible, then dissolve (last 15%)
-        const fIn  = 0.08;
-        const fOut = 0.85;
+        // Opacity: fade in quickly, visible, then dissolve
+        const fIn  = FADE_IN_THRESHOLD;
+        const fOut = FADE_OUT_THRESHOLD;
         let   jetOp = 1;
         if (progress < fIn)       jetOp = progress / fIn;
         else if (progress > fOut) jetOp = Math.max(0, 1 - (progress - fOut) / (1 - fOut));
