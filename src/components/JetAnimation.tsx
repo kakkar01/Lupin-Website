@@ -12,24 +12,25 @@ function traceJetPath(
   s: number,
   sx: number = 1, // horizontal stretch (for motion-blur ghosts)
 ) {
-  const X = (v: number) => ox - v * s * sx;
-  const Y = (v: number) => oy + v * s;
+  // toX / toY: convert normalized jet coords → canvas pixels
+  const toX = (v: number) => ox - v * s * sx;
+  const toY = (v: number) => oy + v * s;
 
   ctx.beginPath();
   // Nose → upper fuselage (bezier) → wing leading-edge → wing tip
-  ctx.moveTo(X(0), Y(0));
-  ctx.bezierCurveTo(X(0.7), Y(-0.05), X(2.0), Y(-0.18), X(2.9), Y(-0.24));
-  ctx.lineTo(X(4.3), Y(-2.5));    // wing tip
-  ctx.lineTo(X(5.8), Y(-0.95));   // wing trailing edge
-  ctx.lineTo(X(6.2), Y(-0.30));   // engine nacelle
-  ctx.lineTo(X(6.9), Y(-0.13));   // upper tail
-  ctx.lineTo(X(7.6), Y(0));       // tail tip
+  ctx.moveTo(toX(0), toY(0));
+  ctx.bezierCurveTo(toX(0.7), toY(-0.05), toX(2.0), toY(-0.18), toX(2.9), toY(-0.24));
+  ctx.lineTo(toX(4.3), toY(-2.5));    // wing tip
+  ctx.lineTo(toX(5.8), toY(-0.95));   // wing trailing edge
+  ctx.lineTo(toX(6.2), toY(-0.30));   // engine nacelle
+  ctx.lineTo(toX(6.9), toY(-0.13));   // upper tail
+  ctx.lineTo(toX(7.6), toY(0));       // tail tip
   // Symmetric lower half
-  ctx.lineTo(X(6.9), Y(0.13));
-  ctx.lineTo(X(6.2), Y(0.30));
-  ctx.lineTo(X(5.8), Y(0.95));
-  ctx.lineTo(X(4.3), Y(2.5));
-  ctx.bezierCurveTo(X(2.0), Y(0.18), X(0.7), Y(0.05), X(0), Y(0));
+  ctx.lineTo(toX(6.9), toY(0.13));
+  ctx.lineTo(toX(6.2), toY(0.30));
+  ctx.lineTo(toX(5.8), toY(0.95));
+  ctx.lineTo(toX(4.3), toY(2.5));
+  ctx.bezierCurveTo(toX(2.0), toY(0.18), toX(0.7), toY(0.05), toX(0), toY(0));
   ctx.closePath();
 }
 
@@ -45,12 +46,12 @@ function drawJet(
 
   // ── Motion-blur ghost trail ─────────────────────────────────────────────
   // Draw progressively-stretched + faded copies behind the jet nose.
-  const GHOSTS = 14;
-  for (let i = GHOSTS; i >= 1; i--) {
-    const t   = i / GHOSTS;
-    const gOp = opacity * t * t * 0.06;      // quad falloff
-    const gSX = 1 + t * 0.55;               // stretch backward
-    const gOX = x + t * s * 5.5;            // offset rearward (left)
+  const TRAIL_LAYERS = 14;
+  for (let i = TRAIL_LAYERS; i >= 1; i--) {
+    const layerT = i / TRAIL_LAYERS;
+    const gOp    = opacity * layerT * layerT * 0.06; // quad falloff
+    const gSX    = 1 + layerT * 0.55;               // stretch backward
+    const gOX    = x + layerT * s * 5.5;            // offset rearward (left)
     traceJetPath(ctx, gOX, y, s, gSX);
     ctx.fillStyle = `rgba(160,160,160,${gOp})`;
     ctx.fill();
@@ -66,8 +67,10 @@ function drawJet(
   ctx.fill();
 
   // ── Engine exhaust glow ─────────────────────────────────────────────────
+  // ENGINE_VERTICAL_OFFSET positions the dual engine nacelles above/below centreline
+  const ENGINE_VERTICAL_OFFSET = 0.28;
   const engineX = x - 6.15 * s;
-  for (const yOff of [-0.28, 0.28]) {
+  for (const yOff of [-ENGINE_VERTICAL_OFFSET, ENGINE_VERTICAL_OFFSET]) {
     const ey   = y + yOff * s;
     const glow = ctx.createRadialGradient(engineX, ey, 0, engineX, ey, s * 0.8);
     glow.addColorStop(0,   `rgba(255,255,255,${opacity * 0.70})`);
@@ -138,8 +141,8 @@ export default function JetAnimation() {
 
     // ── Render loop ──────────────────────────────────────────────────────────
     const render = () => {
-      const now = performance.now();
-      const t   = ((now - startTime) / 1000) % LOOP; // 0 .. LOOP
+      const now      = performance.now();
+      const loopTime = ((now - startTime) / 1000) % LOOP; // 0 .. LOOP seconds
       ctx.clearRect(0, 0, cw, ch);
 
       // ── Volumetric centre bloom ────────────────────────────────────────
@@ -168,8 +171,8 @@ export default function JetAnimation() {
       }
 
       // ── Jet pass ────────────────────────────────────────────────────────
-      if (t < FLIGHT + 1.0) {
-        const progress = t / FLIGHT;           // 0 → 1+ while flying
+      if (loopTime < FLIGHT + 1.0) {
+        const progress = loopTime / FLIGHT;     // 0 → 1+ while flying
         const s        = cw * 0.038;           // scale unit  (body ≈ 304px @ 1920w)
 
         // Nose travels from offscreen-left to offscreen-right
@@ -197,29 +200,29 @@ export default function JetAnimation() {
 
       // ── Shockwave / ripple rings ────────────────────────────────────────
       for (let i = rings.length - 1; i >= 0; i--) {
-        const rg = rings[i];
-        rg.rx += 4.2;                        // expand outward
-        rg.op *= 0.958;                       // fade
+        const ring = rings[i];
+        ring.rx += 4.2;                        // expand outward
+        ring.op *= 0.958;                      // fade
 
-        if (rg.op < 0.003 || rg.rx > cw * 0.22) {
+        if (ring.op < 0.003 || ring.rx > cw * 0.22) {
           rings.splice(i, 1);
           continue;
         }
 
         ctx.save();
-        ctx.strokeStyle = `rgba(200,200,200,${rg.op})`;
+        ctx.strokeStyle = `rgba(200,200,200,${ring.op})`;
         ctx.lineWidth   = 1.1;
         ctx.filter      = "blur(2px)";
         ctx.beginPath();
-        ctx.ellipse(rg.x, rg.y, rg.rx, rg.rx * 0.20, 0, 0, Math.PI * 2); // flat ellipse
+        ctx.ellipse(ring.x, ring.y, ring.rx, ring.rx * 0.20, 0, 0, Math.PI * 2); // flat ellipse
         ctx.stroke();
         ctx.restore();
-        // reset filter after save/restore so subsequent draws aren't affected
+        // filter resets automatically with ctx.restore()
       }
 
       // ── Light streak along jet flight path (lingers briefly) ───────────
-      if (t < FLIGHT * 1.6) {
-        const streakAlpha = Math.max(0, 1 - t / (FLIGHT * 1.6)) * 0.018;
+      if (loopTime < FLIGHT * 1.6) {
+        const streakAlpha = Math.max(0, 1 - loopTime / (FLIGHT * 1.6)) * 0.018;
         const sy          = ch * JET_Y;
         const streak      = ctx.createLinearGradient(0, sy - 1, 0, sy + 1);
         streak.addColorStop(0,   "rgba(255,255,255,0)");
