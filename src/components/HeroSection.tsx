@@ -23,6 +23,13 @@ function MicroGrid() {
   );
 }
 
+// ── Eclipse orb constants ─────────────────────────────────────────────────────
+const GRAIN_SVG_URL =
+  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")";
+
+const GRAIN_MASK =
+  "radial-gradient(circle at 50% 50%, black 35%, transparent 68%)";
+
 // ── Eclipse orb ───────────────────────────────────────────────────────────────
 function EclipseOrb() {
   return (
@@ -110,19 +117,16 @@ function EclipseOrb() {
       {/* Layer 6: Grain texture over glow area */}
       <div
         style={{
-          position:     "absolute",
-          width:        "clamp(520px, 82vw, 1060px)",
-          height:       "clamp(520px, 82vw, 1060px)",
-          borderRadius: "50%",
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
-          backgroundSize: "200px 200px",
-          mixBlendMode:   "overlay",
-          opacity:        0.065,
-          maskImage:
-            "radial-gradient(circle at 50% 50%, black 35%, transparent 68%)",
-          WebkitMaskImage:
-            "radial-gradient(circle at 50% 50%, black 35%, transparent 68%)",
+          position:        "absolute",
+          width:           "clamp(520px, 82vw, 1060px)",
+          height:          "clamp(520px, 82vw, 1060px)",
+          borderRadius:    "50%",
+          backgroundImage: GRAIN_SVG_URL,
+          backgroundSize:  "200px 200px",
+          mixBlendMode:    "overlay",
+          opacity:         0.065,
+          maskImage:            GRAIN_MASK,
+          WebkitMaskImage:      GRAIN_MASK,
         }}
       />
 
