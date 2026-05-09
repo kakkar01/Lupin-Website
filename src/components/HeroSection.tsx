@@ -23,6 +23,144 @@ function MicroGrid() {
   );
 }
 
+// ── Eclipse orb ───────────────────────────────────────────────────────────────
+function EclipseOrb() {
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      style={{ zIndex: 3 }}
+      aria-hidden="true"
+    >
+      {/* Layer 1: Wide outer atmospheric haze */}
+      <motion.div
+        animate={{ scale: [1, 1.03, 1], opacity: [0.6, 0.9, 0.6] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          position:     "absolute",
+          width:        "clamp(520px, 82vw, 1060px)",
+          height:       "clamp(520px, 82vw, 1060px)",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle at 50% 50%, transparent 28%, rgba(255,255,255,0.035) 48%, rgba(255,255,255,0.075) 62%, rgba(255,255,255,0.025) 76%, transparent 88%)",
+          filter: "blur(52px)",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* Layer 2: Secondary haze ring for depth */}
+      <motion.div
+        animate={{ scale: [1.02, 0.98, 1.02], opacity: [0.4, 0.65, 0.4] }}
+        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+        style={{
+          position:     "absolute",
+          width:        "clamp(400px, 64vw, 820px)",
+          height:       "clamp(400px, 64vw, 820px)",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle at 50% 50%, transparent 36%, rgba(255,255,255,0.055) 54%, rgba(255,255,255,0.10) 64%, rgba(255,255,255,0.03) 78%, transparent 90%)",
+          filter: "blur(28px)",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* Layer 3: Corona bloom — bright rim around the black core */}
+      <motion.div
+        animate={{ scale: [1, 1.025, 1], opacity: [0.75, 1, 0.75] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+        style={{
+          position:     "absolute",
+          width:        "clamp(300px, 48vw, 640px)",
+          height:       "clamp(300px, 48vw, 640px)",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.92) 42%, rgba(255,255,255,0.28) 54%, rgba(255,255,255,0.13) 64%, rgba(255,255,255,0.04) 76%, transparent 88%)",
+          filter: "blur(14px)",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* Layer 4: Solid black core */}
+      <motion.div
+        animate={{ scale: [1, 1.012, 1] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          position:     "absolute",
+          width:        "clamp(190px, 28vw, 380px)",
+          height:       "clamp(190px, 28vw, 380px)",
+          borderRadius: "50%",
+          background:   "#000",
+          boxShadow:
+            "0 0 0 1.5px rgba(255,255,255,0.07), 0 0 36px 10px rgba(255,255,255,0.11), 0 0 80px 28px rgba(255,255,255,0.06), 0 0 160px 60px rgba(255,255,255,0.02)",
+          willChange: "transform",
+        }}
+      />
+
+      {/* Layer 5: Inner rim highlight on core edge */}
+      <div
+        style={{
+          position:     "absolute",
+          width:        "clamp(190px, 28vw, 380px)",
+          height:       "clamp(190px, 28vw, 380px)",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle at 50% 50%, transparent 68%, rgba(255,255,255,0.09) 79%, rgba(255,255,255,0.16) 90%, rgba(255,255,255,0.04) 100%)",
+        }}
+      />
+
+      {/* Layer 6: Grain texture over glow area */}
+      <div
+        style={{
+          position:     "absolute",
+          width:        "clamp(520px, 82vw, 1060px)",
+          height:       "clamp(520px, 82vw, 1060px)",
+          borderRadius: "50%",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
+          backgroundSize: "200px 200px",
+          mixBlendMode:   "overlay",
+          opacity:        0.065,
+          maskImage:
+            "radial-gradient(circle at 50% 50%, black 35%, transparent 68%)",
+          WebkitMaskImage:
+            "radial-gradient(circle at 50% 50%, black 35%, transparent 68%)",
+        }}
+      />
+
+      {/* Layer 7: Slow-rotating fog wisps */}
+      <motion.div
+        animate={{ rotate: [0, 360], opacity: [0.035, 0.07, 0.035] }}
+        transition={{ duration: 44, repeat: Infinity, ease: "linear" }}
+        style={{
+          position:     "absolute",
+          width:        "clamp(360px, 58vw, 780px)",
+          height:       "clamp(360px, 58vw, 780px)",
+          borderRadius: "50%",
+          background:
+            "conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.045) 35deg, transparent 72deg, transparent 152deg, rgba(255,255,255,0.032) 192deg, transparent 232deg, transparent 316deg, rgba(255,255,255,0.022) 356deg, transparent 360deg)",
+          filter:     "blur(28px)",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* Layer 8: Counter-rotating secondary fog for parallax depth */}
+      <motion.div
+        animate={{ rotate: [360, 0], opacity: [0.02, 0.05, 0.02] }}
+        transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        style={{
+          position:     "absolute",
+          width:        "clamp(300px, 48vw, 640px)",
+          height:       "clamp(300px, 48vw, 640px)",
+          borderRadius: "50%",
+          background:
+            "conic-gradient(from 120deg, transparent 0deg, rgba(255,255,255,0.035) 28deg, transparent 60deg, transparent 200deg, rgba(255,255,255,0.025) 230deg, transparent 268deg, transparent 360deg)",
+          filter:     "blur(22px)",
+          willChange: "transform, opacity",
+        }}
+      />
+    </div>
+  );
+}
+
 // ── Horizontal light streak ───────────────────────────────────────────────────
 function LightStreak() {
   return (
@@ -168,6 +306,9 @@ export default function HeroSection() {
       <MicroGrid />
 
       <section className="relative w-full h-screen flex flex-col justify-center overflow-hidden z-10">
+        {/* ── Eclipse orb — cinematic visual anchor ── */}
+        <EclipseOrb />
+
         {/* ── Light streak behind text ── */}
         <LightStreak />
 
